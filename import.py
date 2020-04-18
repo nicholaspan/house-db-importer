@@ -20,6 +20,10 @@ SQLITE_DATABASE='students.db'
 
 def main(argv):
     import_file = ''
+    if not argv:
+        print("ERROR... Please supply an import file...")
+        print("ERROR... Correct usage: import.py -i <import_file>")
+        sys.exit(2)
     try:
         opts, args = getopt.getopt(argv, "hi:",["input"])
     except getopt.GetoptError:
