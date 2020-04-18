@@ -14,6 +14,10 @@ import sqlite3
 import sys
 
 
+# Tweak this variable if SQLite DB name changes...
+SQLITE_DATABASE='students.db'
+
+
 def main(argv):
     import_file = ''
     try:
@@ -28,7 +32,7 @@ def main(argv):
             sys.exit()
         elif opt in ("-i", "--input"):
             import_file = arg
-    print("Importing " + import_file + "...")
+    print("You have chosen to import file:  " + import_file + "!")
 
     # Open characters.csv in read-only mode
     with open(import_file, newline='') as csvfile:
@@ -37,9 +41,7 @@ def main(argv):
         next(char_reader)
         for row in char_reader:
             full_name = row[0]
-            print(full_name)
             full_name = full_name.split(' ')
-            print(full_name)
             # Length of full name list is 2 meaning just full name, last name
             if len(full_name) == 2:
                 first_name = full_name[0]
@@ -52,6 +54,8 @@ def main(argv):
             house = row[1]
             birth_year = row[2]
             insert_to_db(first_name, middle_name, last_name, house, birth_year)
+    
+    print(import_file + " has been imported into database: " + SQLITE_DATABASE)
 
 # Helper function 
 def insert_to_db(first, middle, last, house, birth):
@@ -61,8 +65,20 @@ def insert_to_db(first, middle, last, house, birth):
     last: STRING : last name
     house: STRING : Harry Potter house that character is a member of
     birth: STRING : birthday of character"""
-    print("Inside insert_to_db!")
-    pass
+    
+    if middle == '':
+        student = (first, last, house, birth)
+        sql = '''   INSERT INTO students(first, last, house, birth)
+                    VALUES(?,?,?,?)   '''
+    else:
+        student = (first, middle, last, house, birth)
+        sql = '''   INSERT INTO students(first, middle, last, house, birth)
+                    VALUES(?,?,?,?,?)   '''
+    # Build connection to students.db database
+    conn = sqlite3.connect('students.db')
+    cur = conn.cursor()
+    cur.execute(sql, student)
+    conn.commit()
 
 
 if __name__ == "__main__":
